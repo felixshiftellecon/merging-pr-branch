@@ -48,7 +48,9 @@ jobs:
                 parameters: temp.json
       - when:
           condition:
-            equal: [ main, << pipeline.git.branch >>]
+            and:
+              - equal: [ main, << pipeline.git.branch >>]
+              - not: $CIRCLE_PULL_REQUEST
           steps:
             - run:
                 name: Prepare deploy workflow parameter
