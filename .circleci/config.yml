@@ -6,15 +6,14 @@ orbs:
   continuation: circleci/continuation@0.2.0
   github-cli: circleci/github-cli@2.1.0
 
-parameters:
-  pull-request-url:
-    type: env_var_name
-    default: CIRCLE_PULL_REQUEST
-
 jobs:
   set_up_continued_workflow:
     docker:
       - image: cimg/base:stable
+    parameters:
+      pull-request-url:
+        type: env_var_name
+        default: CIRCLE_PULL_REQUEST
     steps:
       - checkout
       - when:
