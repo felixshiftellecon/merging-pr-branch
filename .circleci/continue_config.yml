@@ -71,7 +71,7 @@ workflows:
     when: << pipeline.parameters.run_deploy_workflow >>
     filters:
       branches:
-        only: main
+        only: /main/
     jobs:
       - the_job:
           which_job: run_deploy_workflow
