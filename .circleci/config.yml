@@ -6,6 +6,11 @@ orbs:
   continuation: circleci/continuation@0.2.0
   github-cli: circleci/github-cli@2.1.0
 
+parameters:
+  pull-request-url:
+    type: env_var_name
+    default: CIRCLE_PULL_REQUEST
+
 jobs:
   set_up_continued_workflow:
     docker:
@@ -15,7 +20,7 @@ jobs:
       - when:
           condition:
             and:
-              - not: $CIRCLE_PULL_REQUEST
+              - not: << parameters.pull-request-url >>
               - not:
                   equal: [ main, << pipeline.git.branch >>]
           steps:
@@ -31,7 +36,7 @@ jobs:
       - when:
           condition:
             and:
-              - $CIRCLE_PULL_REQUEST
+              - << parameters.pull-request-url >>
               - not:
                   equal: [ main, << pipeline.git.branch >>]
           steps:
