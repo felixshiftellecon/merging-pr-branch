@@ -29,7 +29,11 @@ jobs:
                 configuration_path: .circleci/continue_config.yml
                 parameters: temp.json
       - when:
-          condition: $CIRCLE_PULL_REQUEST
+          condition:
+            and:
+              - $CIRCLE_PULL_REQUEST
+              - not:
+                  equal: [ main, << pipeline.git.branch >>]
           steps:
             - github-cli/setup
             - run:
