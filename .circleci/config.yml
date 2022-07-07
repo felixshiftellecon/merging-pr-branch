@@ -1,0 +1,76 @@
+version: 2.1
+
+setup: true
+
+orbs:
+  continuation: circleci/continuation@0.2.0
+  github-cli: circleci/github-cli@2.1.0
+
+jobs:
+  set_up_continued_workflow:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - when:
+          condition:
+            and:
+              - not: $CIRCLE_PULL_REQUEST
+              - not:
+                  equal: [ main, << pipeline.git.branch >>]
+          steps:
+            - run:
+                name: Prepare dev workflow parameter
+                command: |
+                        jq -n \
+                        --arg run_dev_workflow "true" \
+                        '{"run_dev_workflow": true}' > temp.json
+            - continuation/continue:
+                configuration_path: .circleci/continue_config.yml
+                parameters: temp.json
+      - when:
+          condition: $CIRCLE_PULL_REQUEST
+          steps:
+            - github-cli/setup
+            - run:
+                name: Prepare PR and branch merging into parameters
+                command: |
+                        BRANCH_MERGING_INTO=$(gh pr view $CIRCLE_PULL_REQUEST --json baseRefName --jq .baseRefName)
+                        
+                        BRANCH_MERGING_INTO=$BRANCH_MERGING_INTO jq -n \
+                        --arg run_pr_workflow "true" \
+                        --arg branch_merging_into "env.BRANCH_MERGING_INTO" \
+                        '{"run_pr_workflow": true, "branch_merging_into": env.BRANCH_MERGING_INTO}' > temp.json
+
+                        cat temp.json
+            - continuation/continue:
+                configuration_path: .circleci/continue_config.yml
+                parameters: temp.json
+      - when:
+          condition:
+            equal: [ main, << pipeline.git.branch >>]
+          steps:
+            - run:
+                name: Prepare deploy workflow parameter
+                command: |
+                        jq -n \
+                        --arg run_deploy_workflow "true" \
+                        '{"run_deploy_workflow": true}' > temp.json
+            - continuation/continue:
+                configuration_path: .circleci/continue_config.yml
+                parameters: temp.json
+
+
+
+workflows:
+  setup-workflow:
+    jobs:
+      - set_up_continued_workflow
+      - continuation/continue:
+          name: Moving the workflow along
+          configuration_path: .circleci/continue_config.yml
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
