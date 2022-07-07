@@ -70,11 +70,3 @@ workflows:
   setup-workflow:
     jobs:
       - set_up_continued_workflow
-      - continuation/continue:
-          name: Moving the workflow along
-          configuration_path: .circleci/continue_config.yml
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
