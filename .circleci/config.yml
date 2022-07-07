@@ -19,7 +19,7 @@ jobs:
       - when:
           condition:
             and:
-              - not: << parameters.pull-request-url >>
+              - equal: [ "", << parameters.pull-request-url >> ]
               - not:
                   equal: [ main, << pipeline.git.branch >>]
           steps:
@@ -35,7 +35,7 @@ jobs:
       - when:
           condition:
             and:
-              - << parameters.pull-request-url >>
+              - equal: [ "", << parameters.pull-request-url >> ]
               - not:
                   equal: [ main, << pipeline.git.branch >>]
           steps:
