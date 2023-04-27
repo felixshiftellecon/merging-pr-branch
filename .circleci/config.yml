@@ -10,12 +10,16 @@ jobs:
   set_up_continued_workflow:
     docker:
       - image: cimg/base:stable
+    parameters:
+      pull-request-url:
+        type: env_var_name
+        default: CIRCLE_PULL_REQUEST
     steps:
       - checkout
       - when:
           condition:
             and:
-              - not: $CIRCLE_PULL_REQUEST
+              - equal: [ nil, << parameters.pull-request-url >> ]
               - not:
                   equal: [ main, << pipeline.git.branch >>]
           steps:
@@ -31,7 +35,8 @@ jobs:
       - when:
           condition:
             and:
-              - $CIRCLE_PULL_REQUEST
+              - not:
+                  equal: [ nil, << parameters.pull-request-url >> ]
               - not:
                   equal: [ main, << pipeline.git.branch >>]
           steps:
